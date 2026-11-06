@@ -27,9 +27,8 @@ if (dbUrl) {
  */
 const pool = new Pool({
     connectionString: dbUrl,
-    ssl: {
-        rejectUnauthorized: false
-    }
+        ssl: false
+    
 });
 
 /**
