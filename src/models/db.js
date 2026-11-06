@@ -1,49 +1,46 @@
+
 import { Pool } from 'pg';
 
 /**
+ * Get the database connection string from environment variables.
+ */
+const dbUrl = process.env.DB_URL || process.env.DATABASE_URL;
+
+/**
+ * Safe connection diagnostics.
+ * Never logs the username, password, or complete connection string.
+ */
+console.log('Database URL available:', Boolean(dbUrl));
+
+if (dbUrl) {
+    try {
+        console.log('Database host:', new URL(dbUrl).hostname);
+    } catch {
+        console.error('Database URL format: invalid');
+    }
+} else {
+    console.error('Database URL is missing. Check Render environment variables.');
+}
+
+/**
  * Connection pool for PostgreSQL database.
- *
- * A connection pool maintains a set of reusable database connections
- * to avoid the overhead of creating new connections for each query.
- * This improves performance and reduces load on the database server.
- *
- * Uses a connection string from environment variables for simplified setup.
- * The connection string format is:
- * postgresql://username:password@host:port/database
  */
 const pool = new Pool({
-    connectionString: process.env.DB_URL || process.env.DATABASE_URL,
-    ssl: true
+    connectionString: dbUrl,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
 /**
- * Common SSL Issue:
- *
- * You may encounter SSL connection errors depending on your operating system,
- * Node.js version, or PostgreSQL server settings. If you have confirmed your
- * credentials are correct but still see SSL errors, try updating the 'ssl'
- * property in the Pool configuration above to:
- *
- * ssl: {
- *     rejectUnauthorized: false
- * }
- */
-
-/**
- * Since we will modify the normal pool object in development mode, we need to
- * create and export a reference to the pool object. This allows us to use the
- * same name for the export regardless of whether we are in development or production mode.
+ * Database query wrapper for development logging.
  */
 let db = null;
 
-if (process.env.NODE_ENV === 'development' && process.env.ENABLE_SQL_LOGGING === 'true') {
-    /**
-     * In development mode, we wrap the pool to provide query logging.
-     * This helps with debugging by showing all executed queries in the console.
-     *
-     * The wrapper also adds timing information to help identify slow queries
-     * and tracks the number of rows affected by each query.
-     */
+if (
+    process.env.NODE_ENV === 'development' &&
+    process.env.ENABLE_SQL_LOGGING === 'true'
+) {
     db = {
         async query(text, params) {
             try {
@@ -73,17 +70,21 @@ if (process.env.NODE_ENV === 'development' && process.env.ENABLE_SQL_LOGGING ===
         }
     };
 } else {
-    // In production, export the pool directly without logging overhead
     db = pool;
 }
 
 /**
- * Tests the database connection by executing a simple query.
+ * Tests the database connection.
  */
 const testConnection = async () => {
     try {
         const result = await db.query('SELECT NOW() as current_time');
-        console.log('Database connection successful:', result.rows[0].current_time);
+
+        console.log(
+            'Database connection successful:',
+            result.rows[0].current_time
+        );
+
         return true;
     } catch (error) {
         console.error('Database connection failed:', error.message);
