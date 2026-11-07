@@ -26,9 +26,8 @@ if (dbUrl) {
  * Connection pool for PostgreSQL database.
  */
 const pool = new Pool({
-   connectionString: process.env.DB_URL,
-        ssl: false
-    
+    connectionString: process.env.DB_URL,
+    ssl: process.env.NODE_ENV === 'development' ? true : false
 });
 
 /**
