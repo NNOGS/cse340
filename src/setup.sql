@@ -164,3 +164,65 @@ VALUES
     'Emene, Enugu',
     '2026-12-30'
 );
+
+-- =========================================
+-- Create the categories table
+-- =========================================
+CREATE TABLE categories (
+    category_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- =========================================
+-- Create the project_categories junction table
+-- =========================================
+CREATE TABLE project_categories (
+    project_id INTEGER NOT NULL,
+    category_id INTEGER NOT NULL,
+
+    PRIMARY KEY (project_id, category_id),
+
+    CONSTRAINT fk_project
+        FOREIGN KEY (project_id)
+        REFERENCES service_projects(project_id),
+
+    CONSTRAINT fk_category
+        FOREIGN KEY (category_id)
+        REFERENCES categories(category_id)
+);
+
+-- =========================================
+-- Insert sample service project categories
+-- =========================================
+INSERT INTO categories (name)
+VALUES
+    ('Education'),
+    ('Community Development'),
+    ('Agriculture and Environment'),
+    ('Social Support');
+
+-- =========================================
+-- Associate service projects with categories
+-- =========================================
+INSERT INTO project_categories (project_id, category_id)
+VALUES
+    -- BrightFuture Builders
+    (1, 1), (1, 2),
+    (2, 1), (2, 2),
+    (3, 2), (3, 4),
+    (4, 2), (4, 4),
+    (5, 2), (5, 3),
+
+    -- GreenHarvest Growers
+    (6, 2), (6, 3),
+    (7, 1), (7, 3),
+    (8, 2), (8, 3),
+    (9, 1), (9, 3),
+    (10, 2), (10, 3),
+
+    -- UnityServe Volunteers
+    (11, 2), (11, 3),
+    (12, 1), (12, 4),
+    (13, 2), (13, 4),
+    (14, 2), (14, 4),
+    (15, 1), (15, 2), (15, 4);    
