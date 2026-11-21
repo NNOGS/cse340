@@ -1,4 +1,3 @@
-
 <%- include('partials/header') %>
 
 <main>
@@ -7,8 +6,12 @@
     <h2>Service Project Categories</h2>
 
     <ul>
-     <% categories.forEach(category => { %>
-            <li><%= category.name %></li>
+        <% categories.forEach(category => { %>
+            <li>
+                <a href="/category/<%= category.category_id %>">
+                    <%= category.name %>
+                </a>
+            </li>
         <% }) %>
     </ul>
 </main>
